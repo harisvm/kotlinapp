@@ -1,0 +1,89 @@
+package com.macom.kotlin1timefighter
+
+
+
+
+import android.os.Bundle
+import android.os.CountDownTimer
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import com.shashank.sony.fancytoastlib.FancyToast
+
+class MainActivity : AppCompatActivity() {
+    internal lateinit var tapMeButton: Button
+    internal lateinit var score: TextView
+    internal lateinit var timeLeft: TextView
+    internal var scoreInt = 0
+    internal lateinit var countDownTimer: CountDownTimer
+    internal val timeLimit: Long = 60000
+    internal val timeDecrement: Long = 1000
+    internal var gameStarted = false
+    internal var timeFinished: Long = 0
+    internal lateinit var resetButton: Button
+    var scoreOnReset: Int = 0
+    var timeLeftOnReset: Long = 0
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        tapMeButton = findViewById(R.id.tapme)
+        score = findViewById(R.id.score)
+        timeLeft = findViewById(R.id.timeLeft)
+        resetButton = findViewById(R.id.reset)
+        tapMeButton.setOnClickListener { v ->
+            incrementScore()
+        }
+        resetButton.setOnClickListener { v ->
+
+        }
+    }
+
+    private fun incrementScore() {
+        if (!gameStarted) {
+            resetGame(timeLimit, timeDecrement)
+            gameStarted = true
+        }
+        scoreInt++
+        score.text = scoreInt.toString()
+    }
+
+    private fun resetGame(timeLimit1: Long, timedecrement: Long) {
+        countDownTimer = object : CountDownTimer(timeLimit1, timedecrement) {
+            override fun onFinish() {
+                gameStarted = false
+                FancyToast.makeText(
+                    this@MainActivity,
+                    "Your Score is " + scoreInt,
+                    FancyToast.LENGTH_LONG, FancyToast.SUCCESS, false
+                ).show()
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+                timeLeft.text = (millisUntilFinished / 1000).toString()
+                timeFinished = millisUntilFinished
+            }
+        }.start()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("score", scoreInt)
+        outState.putInt("countdown", timeFinished.toInt() / 1000)
+        countDownTimer.cancel()
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        scoreOnReset = savedInstanceState.getInt("score")
+        timeLeft.text = timeLeftOnReset.toString()
+        timeLeftOnReset= savedInstanceState.getInt("countdown").toLong()
+        gameStarted = true
+        timeLeft.text = timeLeftOnReset.toString()
+        timeLeft.text = timeLeftOnReset.toString()
+        resetGame(timeLeftOnReset, timeDecrement)
+        countDownTimer.start()
+
+
+
+    }
+}
