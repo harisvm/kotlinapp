@@ -1,8 +1,6 @@
 package com.macom.kotlin1timefighter
 
 
-
-
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.widget.Button
@@ -34,21 +32,55 @@ class MainActivity : AppCompatActivity() {
             incrementScore()
         }
         resetButton.setOnClickListener { v ->
+        }
+        if (savedInstanceState != null) {
+            scoreOnReset = savedInstanceState.getInt("score")
+            timeLeftOnReset = timeLimit-savedInstanceState.getInt("countdown").toLong()
+            restoreButton()
+        } else {
+            resetGame()
+        }
+    }
+
+
+    private fun restoreButton() {
+        score.text = scoreOnReset.toString()
+        timeLeft.text = timeLeftOnReset.toString()
+
+
+        countDownTimer = object : CountDownTimer(timeLeftOnReset , timeDecrement) {
+            override fun onFinish() {
+                gameStarted = false
+                FancyToast.makeText(
+                    this@MainActivity,
+                    "Your Score is " + scoreInt,
+                    FancyToast.LENGTH_LONG, FancyToast.SUCCESS, false).show()
+
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+
+                timeLeft.text = (millisUntilFinished / 1000).toString()
+                timeFinished = millisUntilFinished
+            }
+
 
         }
+        countDownTimer.start()
+        gameStarted = true
     }
 
     private fun incrementScore() {
         if (!gameStarted) {
-            resetGame(timeLimit, timeDecrement)
+            resetGame()
             gameStarted = true
         }
         scoreInt++
         score.text = scoreInt.toString()
     }
 
-    private fun resetGame(timeLimit1: Long, timedecrement: Long) {
-        countDownTimer = object : CountDownTimer(timeLimit1, timedecrement) {
+    private fun resetGame() {
+        countDownTimer = object : CountDownTimer(timeLimit, timeDecrement) {
             override fun onFinish() {
                 gameStarted = false
                 FancyToast.makeText(
@@ -72,18 +104,18 @@ class MainActivity : AppCompatActivity() {
         countDownTimer.cancel()
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        scoreOnReset = savedInstanceState.getInt("score")
-        timeLeft.text = timeLeftOnReset.toString()
-        timeLeftOnReset= savedInstanceState.getInt("countdown").toLong()
-        gameStarted = true
-        timeLeft.text = timeLeftOnReset.toString()
-        timeLeft.text = timeLeftOnReset.toString()
-        resetGame(timeLeftOnReset, timeDecrement)
-        countDownTimer.start()
-
-
-
-    }
+//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+//        super.onRestoreInstanceState(savedInstanceState)
+//        scoreOnReset = savedInstanceState.getInt("score")
+//        timeLeft.text = timeLeftOnReset.toString()
+//        timeLeftOnReset= savedInstanceState.getInt("countdown").toLong()
+//        gameStarted = true
+//        timeLeft.text = timeLeftOnReset.toString()
+//        timeLeft.text = timeLeftOnReset.toString()
+//        resetGame()
+//        countDownTimer.start()
+//
+//
+//
+//    }
 }
